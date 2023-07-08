@@ -45,4 +45,3 @@ class Admin extends BaseController
         // Anda dapat menggunakan library atau service email yang sesuai di sini
     }
 }
-?>
