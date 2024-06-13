@@ -1,39 +1,139 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Profile - Peminjaman Ruang Kelas</title>
-</head>
-<body>
-    <h1>User Profile</h1>
-    
-    <?php
-    // User data (retrieve from the database or any other data source)
-    $user = [
-        'name' => 'Jane Smith',
-        'email' => 'janesmith@example.com',
-        'role' => 'Student',
-        'classroom' => 'A101',
-    ];
-    ?>
-    
-    <h2>Profile Information</h2>
-    <p><strong>Name:</strong> <?php echo $user['name']; ?></p>
-    <p><strong>Email:</strong> <?php echo $user['email']; ?></p>
-    <p><strong>Role:</strong> <?php echo $user['role']; ?></p>
-    <p><strong>Classroom:</strong> <?php echo $user['classroom']; ?></p>
-    
-    <br>
-    
-    <!-- Room booking form -->
-    <h2>Room Booking</h2>
-    <form action="process_booking.php" method="post">
-        <label for="room">Room:</label>
-        <input type="text" name="room" id="room" required><br>
-        
-        <label for="date">Date:</label>
-        <input type="date" name="date" id="date" required><br>
-        
-        <input type="submit" value="Book Room">
-    </form>
-</body>
-</html>
+<!-- Content Header -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6 h5">
+                Profil
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /.content-header -->
+<?php
+
+?>
+<!-- Main Content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">User Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="biodata-form">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    value="<?= $user['name'] ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="<?= $user['email'] ?>" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Change Password</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="password-form">
+                            <div class="form-group">
+                                <label for="current_password">Current Password</label>
+                                <input type="password" class="form-control" id="current_password"
+                                    name="current_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new_password">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="change-password-form">Change Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- /.content -->
+
+<!-- Edit Password -->
+<script>
+    $(document).ready(function () {
+        $('#biodata-form').on('submit', function (e) {
+            e.preventDefault();
+
+            // Perform client-side validation if needed
+
+            $.ajax({
+                url: 'profile/update',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        // Password changed successfully
+                        alert(response.message);
+                        // You can redirect to another page or perform any other action here
+                    } else {
+                        // Error occurred, display error message
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Error occurred, display error message
+                    console.log(error);
+                    alert('An error occurred while changing profile data. Please try again later.');
+                }
+            });
+        });
+    });
+
+</script><!-- Edit Password -->
+<script>
+    $(document).ready(function () {
+        $('#password-form').on('submit', function (e) {
+            e.preventDefault();
+
+            var currentPassword = $('#current-password').val();
+            var newPassword = $('#new-password').val();
+            var confirmPassword = $('#confirm-password').val();
+
+            // Perform client-side validation if needed
+
+            $.ajax({
+                url: 'profile/changepassword',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        // Password changed successfully
+                        alert(response.message);
+                        // You can redirect to another page or perform any other action here
+                    } else {
+                        // Error occurred, display error message
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Error occurred, display error message
+                    alert('An error occurred while changing the password. Please try again later.');
+                }
+            });
+        });
+    });
+
+</script>

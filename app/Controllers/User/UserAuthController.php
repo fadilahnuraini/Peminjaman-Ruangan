@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Controllers\admin;
+namespace App\Controllers\User;
 
 use App\Controllers\BaseController;
-use App\Models\AdminModel;
+use App\Models\UserModel;
 
-class AuthController extends BaseController
+class UserAuthController extends BaseController
 {
-
+    public function index()
+    {
+        return view('user/index');
+    }
     public function login()
     {
         helper(['form']);
@@ -15,12 +18,12 @@ class AuthController extends BaseController
         $request = service('request')->getMethod();
 
         if (!($request === 'post')) {
-            return view('admin/login');
+            return view('user/login');
         }
         $email = $this->request->getPost('email');
         $password = (string) $this->request->getPost('password');
         $session = session();
-        $model = new AdminModel();
+        $model = new UserModel();
         $login = $model->where('email', $email)->first();
         if ($login) {
             $pass = $login['password'];
@@ -36,34 +39,34 @@ class AuthController extends BaseController
                     'logged_in' => TRUE,
                 ];
                 $session->set($login_data);
-                return redirect()->to(base_url('admin/dashboard'));
+                return redirect()->to(base_url('user/dashboard'));
             } else {
                 $session->setFlashdata("errors", "Password salah.");
-                return redirect()->to(base_url('admin/login'));
+                return redirect()->to(base_url('login'));
             }
         } else {
             $session->setFlashdata("errors", "Email tidak terdaftar.");
-            return redirect()->to(base_url('admin/login'));
+            return redirect()->to(base_url('login'));
         }
-
     }
-
 
     public function logout()
     {
         session()->destroy();
-        return redirect()->to(base_url('admin/login'));
+        return redirect()->to('/login');
     }
 
     private function validateCredentials($email, $password)
     {
         $db = db_connect();
-        $model = new AdminModel();
 
         // Query the 'pengguna' table to validate the credentials
-        $query = $model->where('email', $email)->where('password', $password)->first();
+        $query = $db->table('pengguna')
+            ->where('email', $email)
+            ->where('password', $password)
+            ->get();
 
-        $result = $query;
+        $result = $query->getRow();
 
         // Check if a matching record is found
         if ($result !== null) {
@@ -80,7 +83,7 @@ class AuthController extends BaseController
         $request = service('request')->getMethod();
 
         if (!($request === 'post')) {
-            return view('admin/register');
+            return view('user/register');
         }
 
         $formData = $this->request;
@@ -106,8 +109,8 @@ class AuthController extends BaseController
                 'password_confirmation' => $passwordConfirmation,
             ])
         ) {
-            // Create a new instance of the AdminModel
-            $adminModel = new AdminModel();
+            // Create a new instance of the userModel
+            $userModel = new UserModel();
 
             // Prepare the data for insertion
             $data = [
@@ -117,13 +120,13 @@ class AuthController extends BaseController
             ];
 
             // Insert the data into the database
-            if ($adminModel->insert($data)) {
+            if ($userModel->insert($data)) {
                 // Set the success flash message
                 $session = session();
                 $session->setFlashdata('success', 'Registration successful! You can now log in.');
 
                 // Registration successful, redirect to login page or display success message
-                return redirect()->to(base_url('admin/login'));
+                return redirect()->to(base_url('login'));
             } else {
                 // Failed to insert data, redirect to register page or display error message
                 return redirect()->back()->with('error', 'Failed to register. Please try again.');
@@ -132,7 +135,5 @@ class AuthController extends BaseController
             // Validation failed, redirect back to the register page with errors
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
-
     }
-
 }

@@ -10,8 +10,8 @@ $routes = Services::routes();
  * Router Setup
  * --------------------------------------------------------------------
  */
-$routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
+$routes->setDefaultNamespace('App\Controllers\\');
+$routes->setDefaultController('');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
@@ -29,31 +29,46 @@ $routes->set404Override();
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->get('/', 'Admin\AuthController::login');
-$routes->get('admin/register', 'Admin\AuthController::register');
-$routes->get('admin/login', 'Admin\AuthController::login');
-$routes->group('admin', ['filter' => 'auth'], function ($routes) {
-    $routes->get('logout', 'Admin\AuthController::logout');
-    $routes->get('kelolaBooking', 'Admin\KelolaBooking::delete');
-    $routes->get('kelolaBooking', 'Admin\KelolaBooking::get');
-    $routes->get('kelolaBooking', 'Admin\KelolaBooking::update');
-    $routes->get('kelolaRuang', 'Admin\KelolaRuang::delete');
-    $routes->get('kelolaRuang', 'Admin\KelolaRuang::get');
-    $routes->get('kelolaRuang', 'Admin\KelolaRuang::update');
-    $routes->get('kelolaRuang', 'Admin\KelolaRuang::create');
-    $routes->get('dashboard', 'Admin\Dashboard::dashboard');
-});
-$routes->get('user/login', 'User\AuthController::login');
-$routes->get('user/register', 'User\AuthController::register');
-$routes->group('user', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'User\Dashboard::dashboard');
+$routes->get('/', 'User\DashboardController::index', ['filter' => 'user_auth']);
+$routes->get('login', 'User\UserAuthController::login');
+$routes->post('login', 'User\UserAuthController::login');
+$routes->get('register', 'User\UserAuthController::register');
+$routes->post('register', 'User\UserAuthController::register');
+$routes->group('user', ['filter' => 'user_auth'], static function ($routes) {
+    $routes->get('dashboard', 'User\DashboardController::index');
+    $routes->get('rooms', 'User\RoomsController::index');
+    $routes->get('bookings', 'User\BookingController::index');
+    $routes->post('process-booking', 'User\BookingController::book');
+    $routes->post('cancel-booking', 'User\BookingController::cancel');
+    $routes->group('profile', static function ($routes) {
+        $routes->get('/', 'User\ProfileController::index');
+        $routes->post('update', 'User\ProfileController::updateProfile');
+        $routes->post('changepassword', 'User\ProfileController::changePassword');
+    });
     $routes->get('logout', 'User\AuthController::logout');
-    $routes->get('kelolaBooking', 'User\KelolaBooking::delete');
-    $routes->get('kelolaBooking', 'User\KelolaBooking::get');
-    $routes->get('kelolaBooking', 'User\KelolaBooking::edit');
-    $routes->get('kelolaBooking', 'User\KelolaBooking::create');
 });
 
+/* 
+    Admin Section
+ */
+$routes->get('admin/login', 'admin\AuthController::login');
+$routes->post('admin/login', 'admin\AuthController::login');
+$routes->get('admin/register', 'admin\AuthController::register');
+$routes->post('admin/register', 'admin\AuthController::register');
+$routes->group('admin', ['filter' => 'admin_auth'], static function ($routes) {
+    $routes->get('dashboard', 'admin\DashboardController::index');
+    $routes->get('users', 'admin\ManageUsersController::index');
+    $routes->delete('users/delete/(:any)', 'admin\ManageUsersController::delete/$1');
+    $routes->get('bookings', 'admin\ManageBookingsController::index');
+    $routes->post('update-booking', 'admin\ManageBookingsController::update');
+    $routes->get('profile', 'admin\ProfileController::index');
+    $routes->post('profile/update', 'admin\ProfileController::updateProfile');
+    $routes->post('profile/changepassword', 'admin\ProfileController::changePassword');
+    $routes->get('rooms', 'admin\ManageRoomsController::index');
+    $routes->post('add-room', 'admin\ManageRoomsController::store');
+    $routes->post('rooms/update/(:any)', 'admin\ManageRoomsController::update/$1');
+    $routes->get('logout', 'admin\AuthController::logout');
+});
 
 
 /*
